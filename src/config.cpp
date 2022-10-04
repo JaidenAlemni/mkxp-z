@@ -188,7 +188,8 @@ void Config::read(int argc, char *argv[]) {
             {"y", "Y"},
             {"z", "Z"},
             {"l", "L"},
-            {"r", "R"}
+            {"r", "R"},
+            {"pause", "Pause"}
         })}
     });
     
@@ -295,12 +296,15 @@ try { exp } catch (...) {}
     BINDING_NAME(z);
     BINDING_NAME(l);
     BINDING_NAME(r);
+    BINDING_NAME(pause);
     
     rgssVersion = clamp(rgssVersion, 0, 3);
     SE.sourceCount = clamp(SE.sourceCount, 1, 64);
     
     // Determine whether to open a console window on... Windows
     winConsole = getEnvironmentBool("MKXPZ_WINDOWS_CONSOLE", editor.debug);
+    // Production override
+    // winConsole = false;
     
 #ifdef __APPLE__
     // Determine whether to use the Metal renderer on macOS

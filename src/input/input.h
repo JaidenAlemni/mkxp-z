@@ -53,7 +53,7 @@ public:
 
 		/* Non-standard extensions */
 		MouseLeft = 38, MouseMiddle = 39, MouseRight = 40,
-        MouseX1 = 41, MouseX2 = 42
+        MouseX1 = 41, MouseX2 = 42, Pause = 43
 	};
     
     void recalcRepeat(unsigned int fps);

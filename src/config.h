@@ -134,6 +134,7 @@ struct Config {
         
         std::string l;
         std::string r;
+        std::string pause;
     } kbActionNames;
     
     std::string userConfPath;

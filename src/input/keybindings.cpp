@@ -72,30 +72,30 @@ static const KbBindingData defaultKbBindings[] =
 	{ SDL_SCANCODE_UP,     Input::Up    },
 	{ SDL_SCANCODE_DOWN,   Input::Down  },
     
-	{ SDL_SCANCODE_SPACE,  Input::C     },
-	{ SDL_SCANCODE_RETURN, Input::C     },
-	{ SDL_SCANCODE_ESCAPE, Input::B     },
-	{ SDL_SCANCODE_KP_0,   Input::B     },
-	{ SDL_SCANCODE_LSHIFT, Input::A     },
-	{ SDL_SCANCODE_X,      Input::B     },
-	{ SDL_SCANCODE_D,      Input::Z     },
-	{ SDL_SCANCODE_Q,      Input::L     },
-	{ SDL_SCANCODE_W,      Input::R     },
+	// { SDL_SCANCODE_ESCAPE, Input::B     },
+	// { SDL_SCANCODE_KP_0,   Input::B     },
+	{ SDL_SCANCODE_S,      Input::C     },
+	{ SDL_SCANCODE_D,      Input::B     },
+	{ SDL_SCANCODE_Q,      Input::A     },
+	{ SDL_SCANCODE_E,      Input::Z     },
+	{ SDL_SCANCODE_SPACE,  Input::R     },
+	{ SDL_SCANCODE_LSHIFT, Input::L     },
 	{ SDL_SCANCODE_A,      Input::X     },
-	{ SDL_SCANCODE_S,      Input::Y     }
+	{ SDL_SCANCODE_W,      Input::Y     },
+	{ SDL_SCANCODE_RETURN, Input::Pause }
 };
 
 /* RGSS1 */
 static const KbBindingData defaultKbBindings1[] =
 {
-	{ SDL_SCANCODE_Z,      Input::A     },
-	{ SDL_SCANCODE_C,      Input::C     },
+	// { SDL_SCANCODE_Z,      Input::A     },
+	// { SDL_SCANCODE_C,      Input::C     }
 };
 
 /* RGSS2 and higher */
 static const KbBindingData defaultKbBindings2[] =
 {
-	{ SDL_SCANCODE_Z,      Input::C     }
+	//{ SDL_SCANCODE_Z,      Input::C     }
 };
 
 static elementsN(defaultKbBindings);
@@ -104,14 +104,15 @@ static elementsN(defaultKbBindings2);
 
 static const CtrlBindingData defaultCtrlBindings[] =
 {
-	{ SDL_CONTROLLER_BUTTON_X, Input::A  },
+	{ SDL_CONTROLLER_BUTTON_X, Input::X  },
 	{ SDL_CONTROLLER_BUTTON_B, Input::B  },
 	{ SDL_CONTROLLER_BUTTON_A, Input::C },
-	{ SDL_CONTROLLER_BUTTON_Y, Input::X  },
-	{ SDL_CONTROLLER_BUTTON_LEFTSTICK, Input::Y  },
-	{ SDL_CONTROLLER_BUTTON_RIGHTSTICK, Input::Z },
-	{ SDL_CONTROLLER_BUTTON_LEFTSHOULDER, Input::L  },
-	{ SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, Input::R  },
+	{ SDL_CONTROLLER_BUTTON_Y, Input::Y  },
+	{ SDL_CONTROLLER_BUTTON_START, Input::Pause },
+	// { SDL_CONTROLLER_BUTTON_LEFTSTICK, Input::Y  },
+	// { SDL_CONTROLLER_BUTTON_RIGHTSTICK, Input::Z },
+	{ SDL_CONTROLLER_BUTTON_LEFTSHOULDER, Input::A  },
+	{ SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, Input::Z  },
     
     { SDL_CONTROLLER_BUTTON_DPAD_UP, Input::Up },
     { SDL_CONTROLLER_BUTTON_DPAD_DOWN, Input::Down },
@@ -156,6 +157,9 @@ BDescVec genDefaultBindings(const Config &conf)
 	addAxisBinding(d, SDL_CONTROLLER_AXIS_LEFTX, Positive, Input::Right);
 	addAxisBinding(d, SDL_CONTROLLER_AXIS_LEFTY, Negative, Input::Up   );
 	addAxisBinding(d, SDL_CONTROLLER_AXIS_LEFTY, Positive, Input::Down );
+
+	addAxisBinding(d, SDL_CONTROLLER_AXIS_TRIGGERLEFT, Positive, Input::L  );
+	addAxisBinding(d, SDL_CONTROLLER_AXIS_TRIGGERRIGHT, Positive, Input::R );
 
 	return d;
 }
@@ -227,7 +231,7 @@ static bool verifyDesc(const BindingDesc &desc)
 	    Input::X, Input::Y, Input::Z,
 	    Input::L, Input::R,
 	    Input::Shift, Input::Ctrl, Input::Alt,
-	    Input::F5, Input::F6, Input::F7, Input::F8, Input::F9
+	    Input::F5, Input::F6, Input::F7, Input::F8, Input::F9, Input::Pause
 	};
 
 	elementsN(codes);

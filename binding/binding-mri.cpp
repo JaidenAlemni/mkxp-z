@@ -165,7 +165,8 @@ static void mriBindingInit() {
         tilemapBindingInit();
     } else {
         windowVXBindingInit();
-        tilemapVXBindingInit();
+        tilemapBindingInit();  // Special override for LoA
+        //tilemapVXBindingInit();
     }
     
     inputBindingInit();

@@ -38,14 +38,14 @@
 #include <algorithm>
 #include <assert.h>
 
-const Vec2i winSize(840, 356);
+const Vec2i winSize(840, 420);
 
 const uint8_t cBgNorm = 50;
 const uint8_t cBgDark = 20;
 const uint8_t cLine = 0;
 const uint8_t cText = 255;
 
-const uint8_t frameWidth = 4;
+// const uint8_t frameWidth = 4;
 const uint8_t fontSize = 15;
 
 static bool pointInRect(const SDL_Rect &r, int x, int y)
@@ -71,10 +71,11 @@ struct VButton
 	BTN_STRING(R),
 	BTN_STRING(A),
 	BTN_STRING(B),
-  BTN_STRING(C),
+ 	BTN_STRING(C),
 	BTN_STRING(X),
 	BTN_STRING(Y),
-  BTN_STRING(Z)
+	BTN_STRING(Z),
+	BTN_STRING(Pause)
 };
 
 static elementsN(vButtons);
@@ -922,6 +923,7 @@ SettingsMenu::SettingsMenu(RGSSThreadData &rtData)
         SET_BUTTON_NAME(9, x);
         SET_BUTTON_NAME(10, y);
         SET_BUTTON_NAME(11, z);
+		SET_BUTTON_NAME(12, pause);
 #undef SET_BUTTON_NAME
     }
     
@@ -941,18 +943,21 @@ SettingsMenu::SettingsMenu(RGSSThreadData &rtData)
 
 	p->rgb = p->winSurf->format;
 
-	const size_t layoutW = 4;
-	const size_t layoutH = 3;
-	assert(layoutW*layoutH == vButtonsN);
+	const size_t layoutRows = 5;
+	const size_t layoutColumns = 3;
+	assert(layoutColumns*layoutRows == vButtonsN + 2);
 
-	const int bWidgetW = winSize.x / layoutH;
+	const int bWidgetW = winSize.x / layoutColumns;
 	const int bWidgetH = 64;
-	const int bWidgetY = winSize.y - layoutW*bWidgetH - 48;
+	const int bWidgetY = winSize.y - layoutRows*bWidgetH - 48;
 
-	for (int y = 0; y < 4; ++y)
-		for (int x = 0; x < 3; ++x)
+	for (int y = 0; y < layoutRows; ++y)
+		for (int x = 0; x < layoutColumns; ++x)
 		{
-			int i = y*3+x;
+			int i = y*layoutColumns+x;
+			// don't create the last two cells, theres nothing there
+			if (i > 12)
+				break;
 			BindingWidget w(i, p, IntRect(x*bWidgetW, bWidgetY+y*bWidgetH,
 			                              bWidgetW, bWidgetH));
 			p->bWidgets.push_back(w);
@@ -984,11 +989,11 @@ SettingsMenu::SettingsMenu(RGSSThreadData &rtData)
 		p->widgets.push_back(&p->buttons[i]);
 
 	/* Labels */
-	const char *info = "Use left click to bind a slot, right click to clear its binding";
+	const char *info = "Use left click to bind a slot, right click to clear it. Parentheses indicate Battle-only controls.";
 	p->infoLabel = Label(p, IntRect(16, 6, winSize.x, 16), info, cText, cText, cText);
 
 	const char *warn = "Warning: Same physical key bound to multiple slots";
-	p->dupWarnLabel = Label(p, IntRect(16, 26, winSize.x, 16), warn, 255, 0, 0);
+	p->dupWarnLabel = Label(p, IntRect(16, 26, winSize.x, 16), warn, 255, 150, 0);
 
 	p->widgets.push_back(&p->infoLabel);
 	p->widgets.push_back(&p->dupWarnLabel);
