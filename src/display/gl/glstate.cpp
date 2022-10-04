@@ -74,11 +74,20 @@ void GLBlendMode::apply(const BlendType &value) {
     gl.BlendFuncSeparate(GL_SRC_ALPHA, GL_ONE, GL_ONE, GL_ONE);
     break;
 
-  case BlendSubstraction:
+  case BlendSubtraction:
     gl.BlendEquation(GL_FUNC_REVERSE_SUBTRACT);
     gl.BlendFuncSeparate(GL_SRC_ALPHA, GL_ONE, GL_ZERO, GL_ONE);
     break;
+  
+  // New blend mode (multiplies source and destination colors) Ref: http://www.andersriggelsen.dk/glblendfunc.php
+  // FIXME: JK this doesn't work right at all :) Alpha is fucky
+  case BlendMultiply:
+    gl.BlendEquation(GL_FUNC_ADD);
+    gl.BlendFuncSeparate(GL_DST_COLOR, GL_ZERO, GL_DST_ALPHA, GL_ZERO);
+    break;
   }
+  
+
 }
 
 void GLBlend::apply(const bool &value) { applyBool(GL_BLEND, value); }

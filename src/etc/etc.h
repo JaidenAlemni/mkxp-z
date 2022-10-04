@@ -35,7 +35,8 @@ enum BlendType
 
 	BlendNormal = 0,
 	BlendAddition = 1,
-	BlendSubstraction = 2
+	BlendSubtraction = 2,
+	BlendMultiply = 3
 };
 
 struct Color : public Serializable

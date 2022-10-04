@@ -239,8 +239,11 @@ void Plane::setBlendType(int value)
 	case BlendAddition :
 		p->blendType = BlendAddition;
 		return;
-	case BlendSubstraction :
-		p->blendType = BlendSubstraction;
+	case BlendSubtraction :
+		p->blendType = BlendSubtraction;
+		return;
+	case BlendMultiply :
+		p->blendType = BlendMultiply;
 		return;
 	}
 }
