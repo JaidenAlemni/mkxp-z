@@ -81,6 +81,11 @@ public:
 		return Vec2i(origin.x, origin.y);
 	}
 
+	bool hasScale() const
+	{
+		return (scale.x != 1 || scale.y != 1);
+	}
+
 	void setPosition(const Vec2 &value)
 	{
 		position = value;

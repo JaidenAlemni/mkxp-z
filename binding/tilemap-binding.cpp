@@ -15,7 +15,7 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU General Public License for more details.
  **
- ** You should have received a copy of the GNU General Public License
+ ** You should have received a copy of the GNU General Public License 
  ** along with mkxp.  If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -155,6 +155,9 @@ DEF_GFX_PROP_B(Tilemap, Visible)
 DEF_GFX_PROP_I(Tilemap, OX)
 DEF_GFX_PROP_I(Tilemap, OY)
 
+DEF_GFX_PROP_F(Tilemap, ZoomX)
+DEF_GFX_PROP_F(Tilemap, ZoomY)
+
 DEF_GFX_PROP_I(Tilemap, Opacity)
 DEF_GFX_PROP_I(Tilemap, BlendType)
 
@@ -189,6 +192,8 @@ void tilemapBindingInit() {
     INIT_PROP_BIND(Tilemap, Visible, "visible");
     INIT_PROP_BIND(Tilemap, OX, "ox");
     INIT_PROP_BIND(Tilemap, OY, "oy");
+    INIT_PROP_BIND(Tilemap, ZoomX, "zoom_x");
+    INIT_PROP_BIND(Tilemap, ZoomY, "zoom_y");
     
     INIT_PROP_BIND(Tilemap, Opacity, "opacity");
     INIT_PROP_BIND(Tilemap, BlendType, "blend_type");

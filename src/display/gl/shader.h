@@ -236,7 +236,8 @@ public:
 	TilemapShader();
 
 	void setAniIndex(int value);
-
+	// TILEMAP ZOOM
+	void setTilemapMat(const float value[16]);
 	void setTone(const Vec4 &value);
 	void setColor(const Vec4 &value);
 	void setOpacity(float value);
@@ -244,7 +245,9 @@ public:
 	void setATFrames(int values[7]);
 
 private:
-	GLint u_aniIndex, u_tone, u_color, u_opacity, u_atFrames;
+	// TILEMAP ZOOM
+	//GLint u_aniIndex, u_tone, u_color, u_opacity, u_atFrames;
+	GLint u_aniIndex, u_tilemapMat, u_tone, u_color, u_opacity;
 };
 
 class FlashMapShader : public ShaderBase

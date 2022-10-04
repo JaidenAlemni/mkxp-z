@@ -604,14 +604,22 @@ TilemapShader::TilemapShader()
 	INIT_SHADER(tilemap, tilemap, TilemapShader);
 
 	ShaderBase::init();
-
+	// TILEMAP ZOOM 
+	GET_U(tilemapMat);
 	GET_U(tone);
 	GET_U(color);
 	GET_U(opacity);
 
 	GET_U(aniIndex);
-	GET_U(atFrames);
+	//GET_U(atFrames);
 }
+
+// TILEMAP ZOOM 
+void TilemapShader::setTilemapMat(const float value[16])
+{
+	gl.UniformMatrix4fv(u_tilemapMat, 1, GL_FALSE, value);
+}
+
 
 void TilemapShader::setTone(const Vec4 &tone)
 {
@@ -630,15 +638,14 @@ void TilemapShader::setOpacity(float value)
 
 void TilemapShader::setAniIndex(int value)
 {
-	gl.Uniform1i(u_aniIndex, value);
+	//gl.Uniform1i(u_aniIndex, value);
+	gl.Uniform1f(u_aniIndex, value);
 }
 
-void TilemapShader::setATFrames(int values[7])
-{
-	gl.Uniform1iv(u_atFrames, 7, values);
-}
-
-
+// void TilemapShader::setATFrames(int values[7])
+// {
+// 	gl.Uniform1iv(u_atFrames, 7, values);
+// }
 
 FlashMapShader::FlashMapShader()
 {
