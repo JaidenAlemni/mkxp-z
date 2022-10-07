@@ -18,4 +18,6 @@ option('steamworks_path', type: 'string', value: '', description: 'Path to Steam
 option('steam_appid', type: 'string', value: '', description: 'Steam AppID. Set this to use SteamAPI_RestartAppIfNecessary')
 option('steamshim_debug', type: 'boolean', value: false, description: 'Whether to show Steamshim debug messages in the console')
 
+option('hide_console', type: 'boolean', value: false, description: 'Disabling the debug console outright.')
+
 option('gfx_backend', type: 'combo', value: 'gl', choices: ['gl', 'gles'], description: 'Graphics rendering API to use.')

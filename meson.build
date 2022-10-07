@@ -92,6 +92,11 @@ if miniffi == true
     global_args += '-DMKXPZ_MINIFFI'
 endif
 
+# Hide console
+if get_option('hide_console')
+    global_args += '-DHIDE_WINDOWS_CONSOLE'
+endif
+
 # Defines
 if get_option('workdir_current')
     global_args += '-DWORKDIR_CURRENT'
