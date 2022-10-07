@@ -1,3 +1,5 @@
+Refer to the [mkxp-z wiki](https://github.com/mkxp-z/mkxp-z/wiki) for building and additional information.
+
 # mkxp-z
 This is a fork of mkxp intended to be a little more than just a barebones recreation of RPG Maker. The original goal was successfully running games based on Pokemon Essentials, which is notoriously dependent on Windows APIs. I'd consider that mission accomplished.
 
