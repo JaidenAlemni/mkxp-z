@@ -1387,6 +1387,32 @@ unsigned long long Input::controllerRepeatTimeEx(int button) {
     return shState->runTime() - p->buttonRepeatTime;
 }
 
+
+const std::string Input::getKeyMappingString(int button)
+{
+    BDescVec binds;
+	shState->rtData().bindingUpdateMsg.get(binds);
+    for (size_t i = 0; i < binds.size(); ++i)
+    {
+        if(binds[i].target == button && !binds[i].src.isController())
+            return binds[i].src.sourceDescString();
+    }
+    return "Unknown Input";
+}
+
+// TODO: This can be better, but I suck at C++
+const std::string Input::getButtonMappingString(int button)
+{
+    BDescVec binds;
+	shState->rtData().bindingUpdateMsg.get(binds);
+    for (size_t i = 0; i < binds.size(); ++i)
+    {
+        if(binds[i].target == button && binds[i].src.isController())
+            return binds[i].src.sourceDescString();
+    }
+    return "Unknown Input";
+}
+
 uint8_t *Input::rawKeyStates(){
     return p->rawStates;
 }

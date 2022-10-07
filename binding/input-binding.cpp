@@ -351,6 +351,33 @@ RB_METHOD(inputControllerPowerLevel) {
     return ret;
 }
 
+RB_METHOD(inputKeyMapping) {
+    RB_UNUSED_PARAM;
+
+    rb_check_argc(argc, 1);
+
+    VALUE button;
+    rb_scan_args(argc, argv, "1", &button);
+
+    int num = getButtonArg(&button);   
+
+    return rb_str_new_cstr(shState->input().getKeyMappingString(num).c_str());
+}
+
+RB_METHOD(inputButtonMapping) {
+    RB_UNUSED_PARAM;
+
+    rb_check_argc(argc, 1);
+
+    VALUE button;
+    rb_scan_args(argc, argv, "1", &button);
+
+    int num = getButtonArg(&button);   
+
+    return rb_str_new_cstr(shState->input().getButtonMappingString(num).c_str());
+}
+
+
 #define AXISFUNC(n, ax1, ax2) \
 RB_METHOD(inputControllerGet##n##Axis) {\
 RB_UNUSED_PARAM;\
@@ -615,6 +642,9 @@ void inputBindingInit() {
     
     _rb_define_module_function(module, "clipboard", inputGetClipboard);
     _rb_define_module_function(module, "clipboard=", inputSetClipboard);
+
+    _rb_define_module_function(module, "key_mapping", inputKeyMapping);
+    _rb_define_module_function(submod, "key_mapping", inputButtonMapping);
     
     if (rgssVer >= 3) {
         VALUE symHash = rb_hash_new();

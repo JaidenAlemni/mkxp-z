@@ -26,6 +26,7 @@
 
 #include <SDL_scancode.h>
 #include <SDL_gamecontroller.h>
+#include <SDL_keyboard.h>
 #include <stdint.h>
 #include <assert.h>
 #include <vector>
@@ -87,6 +88,61 @@ struct SourceDesc
 	bool operator!=(const SourceDesc &o) const
 	{
 		return !(*this == o);
+	}
+
+	bool isController() const
+	{
+		switch(type)
+		{
+		case Invalid:
+			return false;
+		case Key:
+			return false;
+		case CButton:
+			return true;
+		case CAxis:
+			return true;
+		default:
+			assert(!"unreachable");
+			return false;
+		}
+	}
+
+	/* Human readable string representation */
+	std::string sourceDescString() const
+	{
+		char buf[128];
+
+		switch (type)
+		{
+		case Invalid:
+			return std::string();
+
+		case Key:
+		{
+			if (d.scan == SDL_SCANCODE_LSHIFT)
+				return "Shift";
+
+			SDL_Keycode key = SDL_GetKeyFromScancode(d.scan);
+			const char *str = SDL_GetKeyName(key);
+
+			if (*str == '\0')
+				return "Unknown key";
+			else
+				return str;
+		}
+		case CButton:
+			snprintf(buf, sizeof(buf), "%d", d.cb);
+			return buf;
+
+		case CAxis:
+			snprintf(buf, sizeof(buf), "%d%c",
+					d.ca.axis, d.ca.dir == Negative ? '-' : '+');
+			return buf;
+		}
+
+		assert(!"unreachable");
+		return "";
 	}
 };
 

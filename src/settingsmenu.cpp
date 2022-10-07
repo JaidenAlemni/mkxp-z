@@ -80,44 +80,6 @@ struct VButton
 
 static elementsN(vButtons);
 
-/* Human readable string representation */
-std::string sourceDescString(const SourceDesc &src)
-{
-	char buf[128];
-	//char pos;
-
-	switch (src.type)
-	{
-	case Invalid:
-		return std::string();
-
-	case Key:
-	{
-		if (src.d.scan == SDL_SCANCODE_LSHIFT)
-			return "Shift";
-
-		SDL_Keycode key = SDL_GetKeyFromScancode(src.d.scan);
-		const char *str = SDL_GetKeyName(key);
-
-		if (*str == '\0')
-			return "Unknown key";
-		else
-			return str;
-	}
-	case CButton:
-		snprintf(buf, sizeof(buf), "%s", shState->input().getButtonName(src.d.cb));
-		return buf;
-
-	case CAxis:
-		snprintf(buf, sizeof(buf), "%s%c",
-		         shState->input().getAxisName(src.d.ca.axis), src.d.ca.dir == Negative ? '-' : '+');
-		return buf;
-	}
-
-	assert(!"unreachable");
-	return "";
-}
-
 struct Widget
 {
 	/* Widgets have a static size and position,
@@ -772,7 +734,7 @@ void BindingWidget::drawHandler(SDL_Surface *surf)
 	/* Draw binding labels */
 	for (size_t i = 0; i < 4; ++i)
 	{
-		std::string lb = sourceDescString(src[i]);
+		std::string lb = src[i].sourceDescString();
 		if (lb.empty())
 			continue;
 
