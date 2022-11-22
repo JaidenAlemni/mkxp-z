@@ -11,6 +11,9 @@ xxd+
 /build
 /builddir
 
+# Don't include Steam SDK
+/steam
+
 # VS Code
 /.vscode
 *.code-workspace
