@@ -13,8 +13,8 @@ attribute vec2 texCoord;
 varying vec2 v_texCoord;
 
 const float tileSize = 16.0;
-const float atAreaW = tileSize*3;
-const float atAreaH = tileSize*4*7.0;
+const float atAreaW = tileSize*3.0;
+const float atAreaH = tileSize*4.0*7.0;
 const float atAniOffset = tileSize*3.0;
 
 // const int nAutotiles = 7;
