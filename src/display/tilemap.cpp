@@ -53,10 +53,9 @@ extern const StaticRect autotileRects[];
 
 typedef std::vector<SVertex> SVVector;
 
-static const int tileSize = 32;
-static const int tilesetW  = 8 * tileSize;
-static const int autotileW = 3 * tileSize;
-static const int autotileH = 4 * tileSize;
+static const int tilesetW  = 8 * TileAtlas::tileSize;
+static const int autotileW = 3 * TileAtlas::tileSize;
+static const int autotileH = 4 * TileAtlas::tileSize;
 
 static const int autotileCount = 7;
 
@@ -69,9 +68,11 @@ static const int atAreaH = autotileH * autotileCount;
 //static const int tsLaneW = tilesetW / 1;
 static const int tsLaneW = tilesetW / 2;
 
-/* Map viewport size  */
-static const int viewpW = 40; //21
-static const int viewpH = 23; //16
+/* Map viewport size  
+* Screen Resolution (1280x720) / Tile Size
+*/
+static const int viewpW = 80; //21
+static const int viewpH = 45; //16
 
 static const size_t zlayersMax = viewpH + 5;
 
@@ -447,7 +448,7 @@ struct TilemapPrivate
 		}
 
 		int tsH = tileset->height();
-		atlas.efTilesetH = tsH - (tsH % tileSize);
+		atlas.efTilesetH = tsH - (tsH % TileAtlas::tileSize);
 
 		atlas.size = TileAtlas::minSize(atlas.efTilesetH, glState.caps.maxTexSize);
 
@@ -717,7 +718,7 @@ struct TilemapPrivate
 		/* Iterate over the 4 tile pieces */
 		for (int i = 0; i < 4; ++i)
 		{
-			FloatRect posRect(x*tileSize, y*tileSize, 16, 16);
+			FloatRect posRect(x*TileAtlas::tileSize, y*TileAtlas::tileSize, TileAtlas::tileSize/2, TileAtlas::tileSize/2);
 			atSelectSubPos(posRect, i);
 
 			FloatRect texRect = pieceRect[i];
@@ -818,9 +819,9 @@ struct TilemapPrivate
 
 		Vec2i texPos = TileAtlas::tileToAtlasCoor(tileX, tileY, atlas.efTilesetH, atlas.size.y);
 		// !! Not sure why it was like this, but adjusting to fix zoom scaling issues...
-		FloatRect texRect((float) texPos.x, (float) texPos.y, tileSize, tileSize);
+		FloatRect texRect((float) texPos.x, (float) texPos.y, TileAtlas::tileSize, TileAtlas::tileSize);
 		//FloatRect texRect((float) texPos.x+0.5f, (float) texPos.y+0.5f, 31, 31);
-		FloatRect posRect(x*tileSize, y*tileSize, tileSize, tileSize);
+		FloatRect posRect(x*TileAtlas::tileSize, y*TileAtlas::tileSize, TileAtlas::tileSize, TileAtlas::tileSize);
 
 		SVertex v[4];
 		Quad::setTexPosRect(v, texRect, posRect);
@@ -922,6 +923,7 @@ struct TilemapPrivate
 			tilemapShader.bind();
 			tilemapShader.applyViewportProj();
 			// TILEMAP ZOOM
+			trans.setGlobalOffset(Vec2i(0,-1));
 			tilemapShader.setTilemapMat(trans.getMatrix());
 			tilemapShader.setTone(tone->norm);
 			tilemapShader.setColor(color->norm);
@@ -1062,7 +1064,7 @@ struct TilemapPrivate
 			updateFlashMapViewport();
 		}
 
-		dispPos = elem.sceneGeo.rect.pos() - wrap(combOrigin, 32);
+		dispPos = elem.sceneGeo.rect.pos() - wrap(combOrigin, TileAtlas::tileSize);
 	}
 
 	void prepare()
@@ -1215,7 +1217,7 @@ void ZLayer::drawInt()
 
 int ZLayer::calculateZ(TilemapPrivate *p, int index)
 {
-	return tileSize * (index + p->viewpPos.y + 1) - p->origin.y;
+	return TileAtlas::tileSize * (index + p->viewpPos.y + 1) - p->origin.y;
 }
 
 void ZLayer::initUpdateZ()

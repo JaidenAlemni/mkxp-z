@@ -38,15 +38,15 @@ struct Column
 typedef std::vector<Column> ColumnVec;
 
 /* Buffer between autotile area and tileset */
-static const int atBuffer = 32;
+static const int atBuffer = tileSize;
 /* Autotile area width */
 //static const int atAreaW = 32*3*8;
-static const int atAreaW = 96*4;
+static const int atAreaW = tileSize*3*4;
 /* Autotile area height */
 //static const int atAreaH = 32*4*7 + atBuffer;
-static const int atAreaH = 128*7 + atBuffer;
+static const int atAreaH = tileSize*4*7 + atBuffer;
 
-static const int tilesetW = 32*8;
+static const int tilesetW = tileSize*8;
 //static const int tsLaneW = tilesetW / 1;
 static const int tsLaneW = tilesetW / 2;
 
@@ -71,7 +71,7 @@ Vec2i minSize(int tilesetH, int maxAtlasSize)
 
 	/* Expand vertically */
 	while (freeArea(width, height) < tsArea && height < maxAtlasSize)
-		height += 32;
+		height += tileSize;
 
 	if (freeArea(width, height) >= tsArea && height <= maxAtlasSize)
 		return Vec2i(width, height);
@@ -185,8 +185,8 @@ BlitVec calcBlits(int tilesetH, const Vec2i &atlasSize)
 
 Vec2i tileToAtlasCoor(int tileX, int tileY, int tilesetH, int atlasH)
 {
-	int laneX = tileX*32;
-	int laneY = tileY*32;
+	int laneX = tileX*tileSize;
+	int laneY = tileY*tileSize;
 
 	int longlaneH = atlasH;
 	int shortlaneH = longlaneH - atAreaH;

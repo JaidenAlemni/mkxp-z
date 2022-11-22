@@ -39,6 +39,8 @@
 
 #include "sigslot/signal.hpp"
 
+static const int tileSize = 16;
+
 static inline int
 wrap(int value, int range)
 {
@@ -68,7 +70,7 @@ getTilePos(const Vec2i &pixelPos)
 	/* Round the pixel position down to the nearest top left
 	 * tile boundary, by masking off the lower 5 bits (2^5 = 32).
 	 * Then divide by 32 to convert into tile units. */
-	return (pixelPos & ~(32-1)) / 32;
+	return (pixelPos & ~(tileSize-1)) / tileSize;
 }
 
 enum AtSubPos
@@ -89,21 +91,21 @@ atSelectSubPos(FloatRect &pos, int i)
 	case TopLeft:
 		return;
 	case TopRight:
-		pos.x += 16;
+		pos.x += tileSize/2;
 		return;
 	case BottomLeft:
-		pos.y += 16;
+		pos.y += tileSize/2;
 		return;
 	case BottomRight:
-		pos.x += 16;
-		pos.y += 16;
+		pos.x += tileSize/2;
+		pos.y += tileSize/2;
 		return;
 	case BottomLeftTable:
-		pos.y += 24;
+		pos.y += tileSize/2*3;
 		return;
 	case BottomRightTable:
-		pos.x += 16;
-		pos.y += 24;
+		pos.x += tileSize/2;
+		pos.y += tileSize/2*3;
 		return;
 	default:
 		assert(!"Unreachable");
@@ -235,7 +237,7 @@ private:
 				if (!sampleFlashColor(color, x+viewp.x, y+viewp.y))
 					continue;
 
-				FloatRect posRect(x*32, y*32, 32, 32);
+				FloatRect posRect(x*tileSize, y*tileSize, tileSize, tileSize);
 
 				CVertex v[4];
 				Quad::setPosRect(v, posRect);

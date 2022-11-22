@@ -28,6 +28,8 @@
 
 namespace TileAtlas
 {
+/* Constant for tile graphic size */
+static const int tileSize = 16;
 
 /* Abstract definition of a blit
  * operation with undefined rect width */
