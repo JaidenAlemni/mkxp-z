@@ -1,4 +1,53 @@
+# mkxp-z Astravia fork
+This is a modified fork of the modified fork of mkxp: mkxp-z. Specifically tailored for use in [Legends of Astravia](https://s.team/a/1233680). Changes are often made out of exclusivity and are not designed to be compatible. **As a result, I highly discourage forking this branch directly.**
+
+That said, feel free to cherry pick potentially useful things. Keep in mind that I (Jaiden) have absolutely no C++ background and am flying off the seat of my pants with any edits or changes, so I doubt anything is remotely stable or good.
+
 Refer to the [mkxp-z wiki](https://github.com/mkxp-z/mkxp-z/wiki) for building and additional information.
+
+## Some changes made so far:
+
+- **Overridden to support XP's Tilemap with VX's Window class.** This means everything will break unless you happen to be coming from [KK20's XP Ace](https://forum.chaos-project.com/index.php?topic=12899.0).
+- Tilemap has received quite a few edits, including:
+    - Set to a minimum 1280x720 resolution
+    - Accepts zoom_x / zoom_y similar to a Sprite, which may be useful for a RGSS-side camera script
+    - Behaves more like the original mkxp branch, utilizing the more tightly packed tile atlas. This will likely nuke any support for "infinite length" autotiles as a result, sorry.
+    - Has a tilesize constant, though it needs work and still needs to be changed in a couple of places. It is currently set to use 16x16 tiles
+- Added a totally not functional multiply blending, and renamed "Substract" to "Subtract" because it drove me absolutely nuts, sorry Ancurio
+- Added an extra "Input::Pause", including to the Windows keybinding menu, so you can bind your start buttons.
+- Add Input#key_mapping / Input::Controller#key_mapping to attempt to get current keybinds Ruby-side (thanks Eblo). Needs a little work, though.
+
+### Build Notes, Etc.
+
+Successfully built on the following platforms:
+- Windows 10 21H2
+    - AMD Ryzen 7 5800X, NVidia 980 Ti
+- macOS Monterey 12.6.1
+    - Macbook Air (13-inch 2017) Intel i5, Intel HD Graphics 6000
+    - Xcode 14.1
+- Ubuntu 20.04 LTS
+    - VM via Parallels on the above Mac
+
+**Windows Build Notes**
+- Installed Ruby 2.7.6 x64 using [RubyInstaller](https://rubyinstaller.org/downloads/)
+- Largely followed the mkxp-z build guide, however, I used the MSYS2 toolchain from RubyInstaller instead of installing it separately since it gave me a lot of hassle.
+- Built happily otherwise
+- Adding Steam was a little weird since it demands an absolute path
+- Created a couple of .sh's in the root build dir for quickly doing a couple different kind of builds (Steam, Debug, Standalone), for convienience 
+
+**macOS Build Notes**
+- Followed the wiki guide mostly. Homebrew was first.
+- Issues largely arose with Ruby not behaving. Installed it following the Rails guide [here](https://gorails.com/setup/macos/12-monterey) (stopping at ruby -v, obviously we don't want to install Rails)
+- Dependency building got hung up on Ripper, so I excluded it. See [this commit](https://github.com/mkxp-z/mkxp-z/commit/a0f1cf0bb934cf5d6329e85a49836fdbb2e5f363).
+- Seemed to happily build Universal on my Intel machine otherwise
+
+**Linux Build Notes**
+- I need a drink before I fill this list in
+
+
+---
+
+*- Original mkxp-z Readme starts here -*
 
 # mkxp-z
 This is a fork of mkxp intended to be a little more than just a barebones recreation of RPG Maker. The original goal was successfully running games based on Pokemon Essentials, which is notoriously dependent on Windows APIs. I'd consider that mission accomplished.
