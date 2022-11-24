@@ -923,7 +923,7 @@ struct TilemapPrivate
 			tilemapShader.bind();
 			tilemapShader.applyViewportProj();
 			// TILEMAP ZOOM
-			trans.setGlobalOffset(Vec2i(0,-1));
+			//trans.setGlobalOffset(Vec2i(0,-1));
 			tilemapShader.setTilemapMat(trans.getMatrix());
 			tilemapShader.setTone(tone->norm);
 			tilemapShader.setColor(color->norm);
