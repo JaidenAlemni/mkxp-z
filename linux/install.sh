@@ -1,7 +1,9 @@
 #!/bin/bash
 BINARY=$1
 ARCH=$2
-STEAM=$3
+# For some reason, Steam isn't loading right. 
+# Just putting absolute path here instead.
+STEAM="/home/liz/Documents/mkxp-z-astravia/steam/sdk/redistributable_bin/linux$ARCH"
 function get_dep()
 {
 echo "Copying $1..."
@@ -19,7 +21,10 @@ get_dep ruby
 get_dep libcrypt
 get_dep libbsd
 
+# Required by Steam Deck(?)
+get_dep libffi
+
 if [ -n "$STEAM" ]; then
   echo "Copying steam_api..."
-  cp "$STEAM/libsteam_api.so" "${MESON_INSTALL_PREFIX}/usr/lib"
+  cp "$STEAM/libsteam_api.so" "${MESON_INSTALL_PREFIX}/lib$ARCH"
 fi
