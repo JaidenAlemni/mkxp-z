@@ -7,7 +7,7 @@ Refer to the [mkxp-z wiki](https://github.com/mkxp-z/mkxp-z/wiki) for building a
 
 ## Some changes made so far:
 
-- **Overridden to support XP's Tilemap with VX's Window class.** This means everything will break unless you happen to be coming from [KK20's XP Ace](https://forum.chaos-project.com/index.php?topic=12899.0).
+- **Overridden to support XP's Tilemap with VX's Window class.** This means everything will break unless you happen to be coming from [KK20's XP Ace](https://forum.chaos-project.com/index.php?topic=12899.0), or you reverse this change in [binding-mri](/binding/binding-mri.cpp) before building.
 - Tilemap has received quite a few edits, including:
     - Set to a minimum 1280x720 resolution
     - Accepts zoom_x / zoom_y similar to a Sprite, which may be useful for a RGSS-side camera script
