@@ -37,6 +37,8 @@ disposableAddChild(VALUE disp, VALUE child)
         return;
     }
     
+    VALUE objID = rb_obj_id(child);
+    
 	VALUE children = rb_iv_get(disp, "children");
     
     bool exists = false;
@@ -47,11 +49,15 @@ disposableAddChild(VALUE disp, VALUE child)
 		rb_iv_set(disp, "children", children);
 	}
     else {
-        exists = RTEST(rb_funcall(children, rb_intern("include?"), 1, child));
+        exists = RTEST(rb_funcall(children, rb_intern("include?"), 1, objID));
     }
 
-	if (!exists)
-        rb_ary_push(children, child);
+    if (!exists) {
+        rb_ary_push(children, objID);
+        VALUE objectspace = rb_const_get(rb_cObject, rb_intern("ObjectSpace"));
+        VALUE method = rb_funcall(disp, rb_intern("method"), 1, rb_id2sym(rb_intern("_sprite_finalizer")));
+        rb_funcall(objectspace, rb_intern("define_finalizer"), 2, child, method);
+    }
     GFX_UNLOCK;
 }
 
@@ -63,16 +69,35 @@ disposableRemoveChild(VALUE disp, VALUE child)
         return;
     }
     
+    VALUE objID = rb_obj_id(child);
+    
     VALUE children = rb_iv_get(disp, "children");
     if (NIL_P(children))
         return;
     
-    VALUE index = rb_funcall(children, rb_intern("index"), 1, child);
+    VALUE index = rb_funcall(children, rb_intern("index"), 1, objID);
     if (NIL_P(index))
         return;
     
     rb_funcall(children, rb_intern("delete_at"), 1, index);
     GFX_UNLOCK;
+}
+
+inline void
+disposableForgetChild(VALUE disp, VALUE child)
+{
+    VALUE children = rb_iv_get(disp, "children");
+    
+    if (NIL_P(children)) {
+        return;
+    }
+    
+    VALUE index = rb_funcall(children, rb_intern("index"), 1, child);
+    if (NIL_P(index)) {
+        return;
+    }
+    
+    rb_funcall(children, rb_intern("delete_at"), 1, index);
 }
 
 inline void
@@ -83,10 +108,16 @@ disposableDisposeChildren(VALUE disp)
 	if (NIL_P(children))
 		return;
 
-	ID dispFun = rb_intern("_mkxp_dispose_alias");
-
-	for (long i = 0; i < RARRAY_LEN(children); ++i)
-		rb_funcall2(rb_ary_entry(children, i), dispFun, 0, 0);
+    for (long i = 0; i < RARRAY_LEN(children); ++i) {
+        int state;
+        rb_protect([](VALUE args){
+            VALUE objectspace = rb_const_get(rb_cObject, rb_intern("ObjectSpace"));
+            VALUE ref = rb_funcall(objectspace, rb_intern("_id2ref"), 1, args);
+            rb_funcall(ref, rb_intern("_mkxp_dispose_alias"), 0);
+            return Qnil;
+        }, rb_ary_entry(children, i), &state);
+    }
+		//rb_funcall2(rb_ary_entry(children, i), dispFun, 0, 0);
 }
 
 template<class C>

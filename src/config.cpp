@@ -134,6 +134,7 @@ void Config::read(int argc, char *argv[]) {
         {"fullscreen", false},
         {"fixedAspectRatio", true},
         {"smoothScaling", false},
+        {"lanczos3Scaling", false},
         {"vsync", false},
         {"defScreenW", 0},
         {"defScreenH", 0},
@@ -141,7 +142,7 @@ void Config::read(int argc, char *argv[]) {
         {"fixedFramerate", 0},
         {"frameSkip", false},
         {"syncToRefreshrate", false},
-        {"solidFonts", false},
+        {"solidFonts", json::array({})},
 #if defined(__APPLE__) && defined(__aarch64__)
         {"preferMetalRenderer", true},
 #else
@@ -169,6 +170,7 @@ void Config::read(int argc, char *argv[]) {
         {"midiChorus", false},
         {"midiReverb", false},
         {"SESourceCount", 6},
+        {"BGMTrackCount", 1},
         {"customScript", ""},
         {"pathCache", true},
         {"useScriptNames", 1},
@@ -180,6 +182,7 @@ void Config::read(int argc, char *argv[]) {
         {"JITVerboseLevel", 0},
         {"JITMaxCache", 100},
         {"JITMinCalls", 10000},
+        {"YJITEnable", false},
         {"bindingNames", json::object({
             {"a", "A"},
             {"b", "B"},
@@ -232,6 +235,7 @@ try { exp } catch (...) {}
     SET_OPT_CUSTOMKEY(jit.verboseLevel, JITVerboseLevel, integer);
     SET_OPT_CUSTOMKEY(jit.maxCache, JITMaxCache, integer);
     SET_OPT_CUSTOMKEY(jit.minCalls, JITMinCalls, integer);
+    SET_OPT_CUSTOMKEY(yjit.enabled, YJITEnable, boolean);
     SET_OPT(rgssVersion, integer);
     SET_OPT(defScreenW, integer);
     SET_OPT(defScreenH, integer);
@@ -244,7 +248,7 @@ try { exp } catch (...) {}
     readGameINI();
     
     // Now check for an extra mkxp.conf in the user's save directory and merge anything else from that
-    userConfPath = customDataPath + "/" CONF_FILE;
+    userConfPath = mkxp_fs::normalizePath(std::string(customDataPath + "/" CONF_FILE).c_str(), 0, 1);
     json::value userConf = readConfFile(userConfPath.c_str());
     copyObject(optsJ, userConf);
     
@@ -255,13 +259,14 @@ try { exp } catch (...) {}
     SET_OPT(fullscreen, boolean);
     SET_OPT(fixedAspectRatio, boolean);
     SET_OPT(smoothScaling, boolean);
+    SET_OPT(lanczos3Scaling, boolean);
     SET_OPT(winResizable, boolean);
     SET_OPT(vsync, boolean);
     SET_STRINGOPT(windowTitle, windowTitle);
     SET_OPT(fixedFramerate, integer);
     SET_OPT(frameSkip, boolean);
     SET_OPT(syncToRefreshrate, boolean);
-    SET_OPT(solidFonts, boolean);
+    fillStringVec(opts["solidFonts"], solidFonts);
 #ifdef __APPLE__
     SET_OPT(preferMetalRenderer, boolean);
 #endif
@@ -277,6 +282,7 @@ try { exp } catch (...) {}
     SET_OPT_CUSTOMKEY(midi.chorus, midiChorus, boolean);
     SET_OPT_CUSTOMKEY(midi.reverb, midiReverb, boolean);
     SET_OPT_CUSTOMKEY(SE.sourceCount, SESourceCount, integer);
+    SET_OPT_CUSTOMKEY(BGM.trackCount, BGMTrackCount, integer);
     SET_STRINGOPT(customScript, customScript);
     SET_OPT(useScriptNames, boolean);
     
@@ -300,6 +306,7 @@ try { exp } catch (...) {}
     
     rgssVersion = clamp(rgssVersion, 0, 3);
     SE.sourceCount = clamp(SE.sourceCount, 1, 64);
+    BGM.trackCount = clamp(BGM.trackCount, 1, 16);
     
     // Determine whether to open a console window on Windows, with force disable
 #ifndef HIDE_WINDOWS_CONSOLE
@@ -331,6 +338,12 @@ static void setupScreenSize(Config &conf) {
         conf.defScreenH = (conf.rgssVersion == 1 ? 480 : 416);
 }
 
+bool Config::fontIsSolid(const char *fontName) const {
+    for (std::string solidfont : solidFonts)
+        if (!strcmp(solidfont.c_str(), fontName)) return true;
+    
+    return false;
+}
 
 void Config::readGameINI() {
     if (!customScript.empty()) {
@@ -386,7 +399,7 @@ void Config::readGameINI() {
     if (dataPathApp.empty())
         dataPathApp = game.title;
     
-    customDataPath = prefPath(dataPathOrg.c_str(), dataPathApp.c_str());
+    customDataPath = mkxp_fs::normalizePath(prefPath(dataPathOrg.c_str(), dataPathApp.c_str()).c_str(), 0, 1);
     
     if (rgssVersion == 0) {
         /* Try to guess RGSS version based on Data/Scripts extension */

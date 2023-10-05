@@ -42,14 +42,16 @@ struct AudioStream
 	 * Multiplied together for final
 	 * playback volume. Used with setVolume().
 	 * Base is set by play().
+     * BaseRatio is set by Audio::setVolume() when no specific channel is specified.
+       It should be identical among all BGM tracks.
 	 * External is used by MeWatch */
 	enum VolumeType
 	{
 		Base = 0,
+        BaseRatio,
 		FadeOut,
 		FadeIn,
-		External,
-
+        External,
 		VolumeTypeCount
 	};
 

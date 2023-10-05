@@ -27,21 +27,26 @@
 #include "sharedmidistate.h"
 #include "eventthread.h"
 #include "sdl-util.h"
+#include "exception.h"
 
 #include <string>
+#include <vector>
 
 #include <SDL_thread.h>
 #include <SDL_timer.h>
 
 struct AudioPrivate
 {
-	AudioStream bgm;
+    
+    std::vector<AudioStream*> bgmTracks;
 	AudioStream bgs;
 	AudioStream me;
 
 	SoundEmitter se;
 
 	SyncPoint &syncPoint;
+    
+    float volumeRatio;
 
 	/* The 'MeWatch' is responsible for detecting
 	 * a playing ME, quickly fading out the BGM and
@@ -64,12 +69,17 @@ struct AudioPrivate
 	} meWatch;
 
 	AudioPrivate(RGSSThreadData &rtData)
-	    : bgm(ALStream::Looped, "bgm"),
-	      bgs(ALStream::Looped, "bgs"),
+	    : bgs(ALStream::Looped, "bgs"),
 	      me(ALStream::NotLooped, "me"),
 	      se(rtData.config),
-	      syncPoint(rtData.syncPoint)
+	      syncPoint(rtData.syncPoint),
+          volumeRatio(1)
 	{
+        for (int i = 0; i < rtData.config.BGM.trackCount; i++) {
+            std::string id = std::string("bgm" + std::to_string(i));
+            bgmTracks.push_back(new AudioStream(ALStream::Looped, id.c_str()));
+        }
+        
 		meWatch.state = MeNotPlaying;
 		meWatch.thread = createSDLThread
 			<AudioPrivate, &AudioPrivate::meWatchFun>(this, "audio_mewatch");
@@ -79,7 +89,17 @@ struct AudioPrivate
 	{
 		meWatch.termReq.set();
 		SDL_WaitThread(meWatch.thread, 0);
+        for (auto track : bgmTracks)
+            delete track;
 	}
+    
+    AudioStream *getTrackByIndex(int index) {
+        if (index < 0) index = 0;
+        if (index > (int)(bgmTracks.size()) - 1) {
+            throw Exception(Exception::MKXPError, "requested BGM track %d out of range (max: %d)", index, bgmTracks.size() - 1);
+        }
+        return bgmTracks[index];
+    }
 
 	void meWatchFun()
 	{
@@ -102,7 +122,9 @@ struct AudioPrivate
 				if (me.stream.queryState() == ALStream::Playing)
 				{
 					/* ME playing detected. -> FadeOutBGM */
-					bgm.extPaused = true;
+                    for (auto track : bgmTracks)
+                        track->extPaused = true;
+                    
 					meWatch.state = BgmFadingOut;
 				}
 
@@ -123,26 +145,45 @@ struct AudioPrivate
 
 					break;
 				}
-
-				bgm.lockStream();
-
-				float vol = bgm.getVolume(AudioStream::External);
-				vol -= fadeOutStep;
-
-				if (vol < 0 || bgm.stream.queryState() != ALStream::Playing)
-				{
-					/* Either BGM has fully faded out, or stopped midway. -> MePlaying */
-					bgm.setVolume(AudioStream::External, 0);
-					bgm.stream.pause();
-					meWatch.state = MePlaying;
-					bgm.unlockStream();
-					me.unlockStream();
-
-					break;
-				}
-
-				bgm.setVolume(AudioStream::External, vol);
-				bgm.unlockStream();
+                
+                bool shouldBreak = false;
+                
+                for (int i = 0; i < (int)(bgmTracks.size()); i++) {
+                    AudioStream *track = bgmTracks[i];
+                    
+                    track->lockStream();
+                    
+                    float vol = track->getVolume(AudioStream::External);
+                    vol -= fadeOutStep;
+                    
+                    if (vol < 0 || track->stream.queryState() != ALStream::Playing) {
+                        /* Either BGM has fully faded out, or stopped midway. -> MePlaying */
+                        track->setVolume(AudioStream::External, 0);
+                        track->stream.pause();
+                        track->unlockStream();
+                        
+                        // check to see if there are any tracks still playing,
+                        // and if the last one was ended this round, this branch should exit
+                        std::vector<AudioStream*> playingTracks;
+                        for (auto t : bgmTracks)
+                            if (t->stream.queryState() == ALStream::Playing)
+                                playingTracks.push_back(t);
+                        
+                        
+                        if (playingTracks.size() <= 0 && !shouldBreak) shouldBreak = true;
+                        continue;
+                    }
+                    
+                    track->setVolume(AudioStream::External, vol);
+                    track->unlockStream();
+                    
+                }
+                if (shouldBreak) {
+                    meWatch.state = MePlaying;
+                    me.unlockStream();
+                    break;
+                }
+                
 				me.unlockStream();
 
 				break;
@@ -153,49 +194,51 @@ struct AudioPrivate
 				me.lockStream();
 
 				if (me.stream.queryState() != ALStream::Playing)
-				{
-					/* ME has ended */
-					bgm.lockStream();
-
-					bgm.extPaused = false;
-
-					ALStream::State sState = bgm.stream.queryState();
-
-					if (sState == ALStream::Paused)
-					{
-						/* BGM is paused. -> FadeInBGM */
-						bgm.stream.play();
-						meWatch.state = BgmFadingIn;
-					}
-					else
-					{
-						/* BGM is stopped. -> MeNotPlaying */
-						bgm.setVolume(AudioStream::External, 1.0f);
-
-						if (!bgm.noResumeStop)
-							bgm.stream.play();
-
-						meWatch.state = MeNotPlaying;
-					}
-
-					bgm.unlockStream();
+                {
+                    /* ME has ended */
+                    for (auto track : bgmTracks) {
+                        track->lockStream();
+                        track->extPaused = false;
+                        
+                        ALStream::State sState = track->stream.queryState();
+                        
+                        if (sState == ALStream::Paused) {
+                            /* BGM is paused. -> FadeInBGM */
+                            track->stream.play();
+                            meWatch.state = BgmFadingIn;
+                        }
+                        else {
+                            /* BGM is stopped. -> MeNotPlaying */
+                            track->setVolume(AudioStream::External, 1.0f);
+                            
+                            if (!track->noResumeStop)
+                                track->stream.play();
+                        }
+                        
+                        meWatch.state = MeNotPlaying;
+                        
+                        track->unlockStream();
+                    }
 				}
 
-				me.unlockStream();
+                me.unlockStream();
 
 				break;
 			}
 
 			case BgmFadingIn :
 			{
-				bgm.lockStream();
+                for (auto track : bgmTracks)
+                    track->lockStream();
 
-				if (bgm.stream.queryState() == ALStream::Stopped)
+				if (bgmTracks[0]->stream.queryState() == ALStream::Stopped)
 				{
 					/* BGM stopped midway fade in. -> MeNotPlaying */
-					bgm.setVolume(AudioStream::External, 1.0f);
+                    for (auto track : bgmTracks)
+                        track->setVolume(AudioStream::External, 1.0f);
 					meWatch.state = MeNotPlaying;
-					bgm.unlockStream();
+                    for (auto track : bgmTracks)
+                        track->unlockStream();
 
 					break;
 				}
@@ -205,15 +248,17 @@ struct AudioPrivate
 				if (me.stream.queryState() == ALStream::Playing)
 				{
 					/* ME started playing midway BGM fade in. -> FadeOutBGM */
-					bgm.extPaused = true;
+                    for (auto track : bgmTracks)
+                        track->extPaused = true;
 					meWatch.state = BgmFadingOut;
 					me.unlockStream();
-					bgm.unlockStream();
+                    for (auto track : bgmTracks)
+                        track->unlockStream();
 
 					break;
 				}
 
-				float vol = bgm.getVolume(AudioStream::External);
+				float vol = bgmTracks[0]->getVolume(AudioStream::External);
 				vol += fadeInStep;
 
 				if (vol >= 1)
@@ -223,10 +268,12 @@ struct AudioPrivate
 					meWatch.state = MeNotPlaying;
 				}
 
-				bgm.setVolume(AudioStream::External, vol);
+                for (auto track : bgmTracks)
+                    track->setVolume(AudioStream::External, vol);
 
 				me.unlockStream();
-				bgm.unlockStream();
+                for (auto track : bgmTracks)
+                    track->unlockStream();
 
 				break;
 			}
@@ -245,19 +292,60 @@ Audio::Audio(RGSSThreadData &rtData)
 void Audio::bgmPlay(const char *filename,
                     int volume,
                     int pitch,
-                    float pos)
+                    float pos,
+                    int track)
 {
-	p->bgm.play(filename, volume, pitch, pos);
+    if (track == -127) {
+        for (auto track : p->bgmTracks)
+            track->stop();
+        
+        track = 0;
+    }
+	p->getTrackByIndex(track)->play(filename, volume, pitch, pos);
 }
 
-void Audio::bgmStop()
+void Audio::bgmStop(int track)
 {
-	p->bgm.stop();
+    if (track == -127) {
+        for (auto track : p->bgmTracks)
+            track->stop();
+        
+        return;
+    }
+    
+    p->getTrackByIndex(track)->stop();
 }
 
-void Audio::bgmFade(int time)
+void Audio::bgmFade(int time, int track)
 {
-	p->bgm.fadeOut(time);
+    if (track == -127) {
+        for (auto track : p->bgmTracks)
+            track->fadeOut(time);
+        
+        return;
+    }
+    
+    p->getTrackByIndex(track)->fadeOut(time);
+}
+
+int Audio::bgmGetVolume(int track)
+{
+    if (track == -127)
+        return p->bgmTracks[0]->getVolume(AudioStream::BaseRatio) * 100;
+    
+    return p->getTrackByIndex(track)->getVolume(AudioStream::Base) * 100;
+}
+
+void Audio::bgmSetVolume(int volume, int track)
+{
+    float vol = volume / 100.0;
+    if (track == -127) {
+        for (auto track : p->bgmTracks)
+            track->setVolume(AudioStream::BaseRatio, vol);
+        
+        return;
+    }
+    p->getTrackByIndex(track)->setVolume(AudioStream::Base, vol);
 }
 
 
@@ -315,9 +403,9 @@ void Audio::setupMidi()
 	shState->midiState().initIfNeeded(shState->config());
 }
 
-float Audio::bgmPos()
+float Audio::bgmPos(int track)
 {
-	return p->bgm.playingOffset();
+	return p->getTrackByIndex(track)->playingOffset();
 }
 
 float Audio::bgsPos()
@@ -327,7 +415,10 @@ float Audio::bgsPos()
 
 void Audio::reset()
 {
-	p->bgm.stop();
+    for (auto track : p->bgmTracks) {
+    	track->stop();
+    }
+
 	p->bgs.stop();
 	p->me.stop();
 	p->se.stop();

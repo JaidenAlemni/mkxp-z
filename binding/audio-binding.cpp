@@ -83,12 +83,73 @@ RB_METHOD(audio_##entity##Fade) \
 		return rb_float_new(shState->audio().entity##Pos()); \
 	}
 
-DEF_PLAY_STOP_POS( bgm )
+// DEF_PLAY_STOP_POS( bgm )
+
+RB_METHOD(audio_bgmPlay)
+{
+    RB_UNUSED_PARAM;
+    const char *filename;
+    int volume = 100;
+    int pitch = 100;
+    double pos = 0.0;
+    int track = -127;
+    rb_get_args(argc, argv, "z|iifi", &filename, &volume, &pitch, &pos, &track RB_ARG_END);
+    GUARD_EXC( shState->audio().bgmPlay(filename, volume, pitch, pos, track); )
+    return Qnil;
+}
+
+RB_METHOD(audio_bgmStop)
+{
+    RB_UNUSED_PARAM;
+    int track = -127;
+    rb_get_args(argc, argv, "|i", &track RB_ARG_END);
+    shState->audio().bgmStop(track);
+    return Qnil;
+}
+
+RB_METHOD(audio_bgmPos)
+{
+    RB_UNUSED_PARAM;
+    int track = 0;
+    rb_get_args(argc, argv, "|i", &track RB_ARG_END);
+    return rb_float_new(shState->audio().bgmPos(track));
+}
+
+RB_METHOD(audio_bgmGetVolume)
+{
+    RB_UNUSED_PARAM;
+    int track = -127;
+    rb_get_args(argc, argv, "|i", &track RB_ARG_END);
+    int ret = 0;
+    GUARD_EXC( ret = shState->audio().bgmGetVolume(track); )
+    return rb_fix_new(ret);
+}
+
+RB_METHOD(audio_bgmSetVolume)
+{
+    RB_UNUSED_PARAM;
+    int volume;
+    int track = -127;
+    rb_get_args(argc, argv, "i|i", &volume, &track RB_ARG_END);
+    GUARD_EXC( shState->audio().bgmSetVolume(volume, track); )
+    return Qnil;
+}
+
 DEF_PLAY_STOP_POS( bgs )
 
 DEF_PLAY_STOP( me )
 
-DEF_FADE( bgm )
+//DEF_FADE( bgm )
+RB_METHOD(audio_bgmFade)
+{
+    RB_UNUSED_PARAM;
+    int time;
+    int track = -127;
+    rb_get_args(argc, argv, "i|i", &time, &track RB_ARG_END);
+    shState->audio().bgmFade(time, track);
+    return Qnil;
+}
+
 DEF_FADE( bgs )
 DEF_FADE( me )
 
@@ -134,6 +195,8 @@ audioBindingInit()
 	VALUE module = rb_define_module("Audio");
 
 	BIND_PLAY_STOP_FADE( bgm );
+    _rb_define_module_function(module, "bgm_volume", audio_bgmGetVolume);
+    _rb_define_module_function(module, "bgm_set_volume", audio_bgmSetVolume);
 	BIND_PLAY_STOP_FADE( bgs );
 	BIND_PLAY_STOP_FADE( me  );
 

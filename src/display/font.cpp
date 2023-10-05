@@ -160,10 +160,9 @@ void SharedFontState::initFontSetCB(SDL_RWops &ops,
 _TTF_Font *SharedFontState::getFont(std::string family,
                                     int size)
 {
-    
-    if (family.empty())
-        family = p->defaultFamily;
-    
+	if (family.empty())
+		family = p->defaultFamily;
+
 	/* Check for substitutions */
 	if (p->subs.contains(family))
 		family = p->subs[family];
@@ -291,6 +290,8 @@ struct FontPrivate
 	 * (when it is queried by a Bitmap), prior it is
 	 * set to null */
 	TTF_Font *sdlFont;
+    
+    bool isSolid;
 
 	FontPrivate(int size)
 	    : size(size),
@@ -302,7 +303,8 @@ struct FontPrivate
 	      outColor(&outColorTmp),
 	      colorTmp(*defaultColor),
 	      outColorTmp(*defaultOutColor),
-	      sdlFont(0)
+	      sdlFont(0),
+          isSolid(false)
 	{}
 
 	FontPrivate(const FontPrivate &other)
@@ -316,7 +318,8 @@ struct FontPrivate
 	      outColor(&outColorTmp),
 	      colorTmp(*other.color),
 	      outColorTmp(*other.outColor),
-	      sdlFont(other.sdlFont)
+	      sdlFont(other.sdlFont),
+          isSolid(false)
 	{}
 
 	void operator=(const FontPrivate &o)
@@ -331,6 +334,7 @@ struct FontPrivate
 		*outColor = *o.outColor;
 
 		sdlFont = 0;
+        isSolid = o.isSolid;
 	}
 };
 
@@ -347,6 +351,10 @@ Color FontPrivate::defaultColorTmp(255, 255, 255, 255);
 Color FontPrivate::defaultOutColorTmp(0, 0, 0, 128);
 
 std::vector<std::string> FontPrivate::initialDefaultNames;
+
+bool Font::isSolid() const {
+    return p->isSolid;
+}
 
 bool Font::doesExist(const char *name)
 {
@@ -387,6 +395,7 @@ const Font &Font::operator=(const Font &o)
 void Font::setName(const std::vector<std::string> &names)
 {
 	pickExistingFontName(names, p->name, shState->fontState());
+    p->isSolid = strcmp(p->name.c_str(), "") && shState->config().fontIsSolid(p->name.c_str());
 	p->sdlFont = 0;
 }
 
