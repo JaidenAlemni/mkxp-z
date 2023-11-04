@@ -404,6 +404,9 @@ struct CacheEnumData {
 
 static PHYSFS_EnumerateCallbackResult cacheEnumCB(void *d, const char *origdir,
                                                   const char *fname) {
+  /* Skip dot files/folders, treating them as hidden */
+  if (fname[0] == '.') return PHYSFS_ENUM_OK;
+
   CacheEnumData &data = *static_cast<CacheEnumData *>(d);
 
   std::string mixedCase;
