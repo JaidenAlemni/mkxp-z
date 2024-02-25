@@ -117,6 +117,10 @@ public:
 	/* Called on game screen (size / offset) changes */
 	void notifyGameScreenChange(const SDL_Rect &screen);
 
+	const std::string getLastInputDevice();
+	const SourceDesc getLastInput();
+	void clearLastInput();
+
 private:
 	static int eventFilter(void *, SDL_Event*);
 
