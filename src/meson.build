@@ -118,7 +118,6 @@ main_source = files(
     'main.cpp',
     'config.cpp',
     'eventthread.cpp',
-    'settingsmenu.cpp',
     'sharedstate.cpp',
     
     'audio/alstream.cpp',

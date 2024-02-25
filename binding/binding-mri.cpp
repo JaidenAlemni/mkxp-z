@@ -127,7 +127,6 @@ RB_METHOD(mkxpUserLanguage);
 RB_METHOD(mkxpUserName);
 RB_METHOD(mkxpGameTitle);
 RB_METHOD(mkxpPowerState);
-RB_METHOD(mkxpSettingsMenu);
 RB_METHOD(mkxpCpuCount);
 RB_METHOD(mkxpSystemMemory);
 RB_METHOD(mkxpReloadPathCache);
@@ -222,7 +221,6 @@ static void mriBindingInit() {
     _rb_define_module_function(mod, "set_window_title", mkxpSetTitle);
     _rb_define_module_function(mod, "window_title", mkxpGetTitle);
     _rb_define_module_function(mod, "window_title=", mkxpSetTitle);
-    _rb_define_module_function(mod, "show_settings", mkxpSettingsMenu);
     _rb_define_module_function(mod, "puts", mkxpPuts);
     _rb_define_module_function(mod, "desensitize", mkxpDesensitize);
     _rb_define_module_function(mod, "platform", mkxpPlatform);
@@ -510,14 +508,6 @@ RB_METHOD(mkxpPowerState) {
                  rb_bool_new(ps == SDL_POWERSTATE_ON_BATTERY));
     
     return hash;
-}
-
-RB_METHOD(mkxpSettingsMenu) {
-    RB_UNUSED_PARAM;
-    
-    shState->eThread().requestSettingsMenu();
-    
-    return Qnil;
 }
 
 RB_METHOD(mkxpCpuCount) {

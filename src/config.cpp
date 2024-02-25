@@ -157,7 +157,6 @@ void Config::read(int argc, char *argv[]) {
         {"gameFolder", ""},
         {"anyAltToggleFS", false},
         {"enableReset", true},
-        {"enableSettings", true},
         {"allowSymlinks", false},
         {"dataPathOrg", ""},
         {"dataPathApp", ""},
@@ -271,7 +270,6 @@ try { exp } catch (...) {}
     SET_OPT(maxTextureSize, integer);
     SET_OPT(anyAltToggleFS, boolean);
     SET_OPT(enableReset, boolean);
-    SET_OPT(enableSettings, boolean);
     SET_STRINGOPT(midi.soundFont, midiSoundFont);
     SET_OPT_CUSTOMKEY(midi.chorus, midiChorus, boolean);
     SET_OPT_CUSTOMKEY(midi.reverb, midiReverb, boolean);

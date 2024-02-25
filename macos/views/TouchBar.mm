@@ -29,7 +29,7 @@ MKXPZTouchBar *_sharedTouchBar;
 @property (retain,nonatomic) NSString *gameTitle;
 
 -(void)updateFPSDisplay:(uint32_t)value;
--(void)setBarLayoutWithSettingsButton:(bool)showSettings andResetButton:(bool)showReset;
+-(void)setBarLayoutWithResetButton:(bool)showReset;
 @end
 
 @implementation MKXPZTouchBar
@@ -42,28 +42,24 @@ MKXPZTouchBar *_sharedTouchBar;
     return _sharedTouchBar;
 }
 
--(void)setBarLayoutWithSettingsButton:(bool)showSettings andResetButton:(bool)showReset {
+-(void)setBarLayoutWithResetButton:(bool)showReset {
     if (!functionKeys) {
         functionKeys = [NSSegmentedControl segmentedControlWithLabels:@[@"F5", @"F6", @"F7", @"F8", @"F9"] trackingMode:NSSegmentSwitchTrackingMomentary target:self action:@selector(simFunctionKey)];
         functionKeys.segmentStyle = NSSegmentStyleSeparated;
     }
     if (!fpsLabel) {
         fpsLabel = [NSTextField labelWithString:@"Loading..."];
-        fpsLabel.alignment = (showReset || showSettings) ? NSTextAlignmentCenter : NSTextAlignmentRight;
+        fpsLabel.alignment = (showReset) ? NSTextAlignmentCenter : NSTextAlignmentRight;
         fpsLabel.font = [NSFont labelFontOfSize:NSFont.smallSystemFontSize];
     }
     
     NSMutableArray *items = [NSMutableArray arrayWithArray:@[@"function", NSTouchBarItemIdentifierFlexibleSpace]];
     
-    if (showReset || showSettings) {
-        [items addObject:@"icon"];
-        [items addObject:@"fps"];
+    [items addObject:@"icon"];
+    [items addObject:@"fps"];
+    if (showReset) {
         [items addObject:NSTouchBarItemIdentifierFlexibleSpace];
-        if (showSettings) [items addObject:@"rebind"];
-        if (showReset) [items addObject:@"reset"];
-    } else {
-        [items addObject:@"fps"];
-        [items addObject:@"icon"];
+        [items addObject:@"reset"];
     }
     self.defaultItemIdentifiers = items;
 }
@@ -90,9 +86,6 @@ MKXPZTouchBar *_sharedTouchBar;
         ret.view = [NSButton buttonWithImage:[NSImage imageNamed:@"gobackward"] target:self action:@selector(simF12)];
         
         ((NSButton*)ret.view).bezelColor = [NSColor colorWithRed:0xac/255.0 green:0x14/255.0 blue:0x01/255.0 alpha:1.0];
-    }
-    else if ([identifier isEqualToString:@"rebind"]) {
-        ret.view = [NSButton buttonWithImage:[NSImage imageNamed:@"gear"] target:self action:@selector(openSettingsMenu)];
     }
     else if ([identifier isEqualToString:@"icon"]) {
         NSImage *appIcon = [[NSApplication sharedApplication] applicationIconImage];
@@ -162,10 +155,6 @@ MKXPZTouchBar *_sharedTouchBar;
     SDL_PushEvent(&e);
 }
 
--(void)openSettingsMenu {
-    shState->eThread().requestSettingsMenu();
-}
-
 @end
 
 void initTouchBar(SDL_Window *win, Config &conf) {
@@ -176,7 +165,7 @@ void initTouchBar(SDL_Window *win, Config &conf) {
     windowinfo.info.cocoa.window.touchBar = tb;
     tb.parent = windowinfo.info.cocoa.window;
     tb.gameTitle = @(conf.game.title.c_str());
-    [tb setBarLayoutWithSettingsButton:conf.enableSettings andResetButton:conf.enableReset];
+    [tb setBarLayoutWithResetButton:conf.enableReset];
 }
 
 void updateTouchBarFPSDisplay(uint32_t value) {

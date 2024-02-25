@@ -37,7 +37,6 @@
 #include "graphics.h"
 
 #ifndef MKXPZ_BUILD_XCODE
-#include "settingsmenu.h"
 #include "gamecontrollerdb.txt.xxd"
 #else
 #include "system/system.h"
@@ -103,8 +102,6 @@ enum
     REQUEST_SETCURSORVISIBLE,
     
     REQUEST_TEXTMODE,
-    
-    REQUEST_SETTINGS,
     
     UPDATE_FPS,
     UPDATE_SCREEN_RECT,
@@ -214,12 +211,6 @@ void EventThread::process(RGSSThreadData &rtData)
     SDL_StopTextInput();
     
     textInputBuffer.clear();
-#ifndef MKXPZ_BUILD_XCODE
-    SettingsMenu *sMenu = 0;
-#else
-    // Will always be 0
-    void *sMenu = 0;
-#endif
     
     while (true)
     {
@@ -228,20 +219,6 @@ void EventThread::process(RGSSThreadData &rtData)
             Debug() << "EventThread: Event error";
             break;
         }
-#ifndef MKXPZ_BUILD_XCODE
-        if (sMenu && sMenu->onEvent(event))
-        {
-            if (sMenu->destroyReq())
-            {
-                delete sMenu;
-                sMenu = 0;
-                
-                updateCursorState(cursorInWindow && windowFocused, gameScreen);
-            }
-            
-            continue;
-        }
-#endif
         
         /* Preselect and discard unwanted events here */
         switch (event.type)
@@ -282,14 +259,14 @@ void EventThread::process(RGSSThreadData &rtData)
                     case SDL_WINDOWEVENT_ENTER :
                         cursorInWindow = true;
                         mouseState.inWindow = true;
-                        updateCursorState(cursorInWindow && windowFocused && !sMenu, gameScreen);
+                        updateCursorState(cursorInWindow && windowFocused, gameScreen);
                         
                         break;
                         
                     case SDL_WINDOWEVENT_LEAVE :
                         cursorInWindow = false;
                         mouseState.inWindow = false;
-                        updateCursorState(cursorInWindow && windowFocused && !sMenu, gameScreen);
+                        updateCursorState(cursorInWindow && windowFocused, gameScreen);
                         
                         break;
                         
@@ -300,13 +277,13 @@ void EventThread::process(RGSSThreadData &rtData)
                         
                     case SDL_WINDOWEVENT_FOCUS_GAINED :
                         windowFocused = true;
-                        updateCursorState(cursorInWindow && windowFocused && !sMenu, gameScreen);
+                        updateCursorState(cursorInWindow && windowFocused, gameScreen);
                         
                         break;
                         
                     case SDL_WINDOWEVENT_FOCUS_LOST :
                         windowFocused = false;
-                        updateCursorState(cursorInWindow && windowFocused && !sMenu, gameScreen);
+                        updateCursorState(cursorInWindow && windowFocused, gameScreen);
                         resetInputStates();
                         
                         break;
@@ -340,28 +317,6 @@ void EventThread::process(RGSSThreadData &rtData)
                     }
                     
                     break;
-                }
-                
-                if (event.key.keysym.scancode == SDL_SCANCODE_F1 && rtData.config.enableSettings)
-                {
-                    // Do not open settings menu until initializing shared state.
-                    // Opening before initializing shared state will crash (segmentation fault).
-                    if (!shState)
-                    {
-                        break;
-                    }
-
-#ifndef MKXPZ_BUILD_XCODE
-                    if (!sMenu)
-                    {
-                        sMenu = new SettingsMenu(rtData);
-                        updateCursorState(false, gameScreen);
-                    }
-                    
-                    sMenu->raise();
-#else
-                    openSettingsWindow();
-#endif
                 }
                 
                 if (event.key.keysym.scancode == SDL_SCANCODE_F2)
@@ -566,20 +521,6 @@ void EventThread::process(RGSSThreadData &rtData)
                         updateCursorState(cursorInWindow, gameScreen);
                         break;
                         
-                    case REQUEST_SETTINGS :
-#ifndef MKXPZ_BUILD_XCODE
-                        if (!sMenu)
-                        {
-                            sMenu = new SettingsMenu(rtData);
-                            updateCursorState(false, gameScreen);
-                        }
-                        
-                        sMenu->raise();
-#else
-                        openSettingsWindow();
-#endif
-                        break;
-                        
                     case UPDATE_FPS :
                         if (rtData.config.printFPS)
                             Debug() << "FPS:" << event.user.code;
@@ -623,10 +564,6 @@ void EventThread::process(RGSSThreadData &rtData)
     
     if (SDL_GameControllerGetAttached(ctrl))
         SDL_GameControllerClose(ctrl);
-    
-#ifndef MKXPZ_BUILD_XCODE
-    delete sMenu;
-#endif
 }
 
 int EventThread::eventFilter(void *data, SDL_Event *event)
@@ -786,13 +723,6 @@ void EventThread::requestTextInputMode(bool mode)
     SDL_Event event;
     event.type = usrIdStart + REQUEST_TEXTMODE;
     event.user.code = mode;
-    SDL_PushEvent(&event);
-}
-
-void EventThread::requestSettingsMenu()
-{
-    SDL_Event event;
-    event.type = usrIdStart + REQUEST_SETTINGS;
     SDL_PushEvent(&event);
 }
 

@@ -10,7 +10,6 @@
 
 #import <sys/sysctl.h>
 #import "system.h"
-#import "SettingsMenuController.h"
 
 std::string systemImpl::getSystemLanguage() {
     NSString *languageCode = NSLocale.currentLocale.languageCode;
@@ -45,16 +44,6 @@ systemImpl::WineHostType systemImpl::getRealHostType() {
     return WineHostType::Mac;
 }
 
-
-// constant, if it's not nil then just raise the menu instead
-SettingsMenu *smenu = nil;
-void openSettingsWindow() {
-    if (smenu == nil) {
-        smenu = [SettingsMenu openWindow];
-        return;
-    }
-    [smenu raise];
-}
 
 bool isMetalSupported() {
     if (@available(macOS 10.13.0, *)) {

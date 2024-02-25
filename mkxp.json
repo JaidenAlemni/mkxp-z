@@ -223,12 +223,6 @@
     //
     // "enableReset": true,
     
-    // Enable F1/keybinding menu
-    // (default: enabled)
-    //
-    // "enableSettings": true,
-
-
     // Allow symlinks for game assets to be followed
     // (default: disabled)
     //
