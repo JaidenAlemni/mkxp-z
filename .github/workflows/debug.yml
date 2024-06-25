@@ -3,7 +3,7 @@ name: Debug AutoBuilds
 
 on:
   push:
-    branches: ['dev', 'astravia-dev']
+    branches: ['dev', 'astravia-dev','wayward-physfs-fixes']
     paths-ignore: ['*.md', '*.json', '*.png']
 
 jobs:
