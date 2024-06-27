@@ -404,10 +404,13 @@ void EventThread::process(RGSSThreadData &rtData)
                 
             case SDL_CONTROLLERAXISMOTION:
                 controllerState.axes[event.caxis.axis] = event.caxis.value;
-                lastInputDevice = LAST_INPUT_DEVICE_GAMEPAD;
-                lastInputDesc.type = CAxis;
-                lastInputDesc.d.ca.axis = (SDL_GameControllerAxis) event.caxis.axis;
-                lastInputDesc.d.ca.dir = event.caxis.value < 0 ? Negative : Positive;
+                // TODO: Make the deadzone here configurable.
+                if ((abs(event.caxis.value) / 32767.0) > 0.35) {
+                    lastInputDevice = LAST_INPUT_DEVICE_GAMEPAD;
+                    lastInputDesc.type = CAxis;
+                    lastInputDesc.d.ca.axis = (SDL_GameControllerAxis) event.caxis.axis;
+                    lastInputDesc.d.ca.dir = event.caxis.value < 0 ? Negative : Positive;
+                }
                 break;
                 
             case SDL_CONTROLLERDEVICEADDED:
