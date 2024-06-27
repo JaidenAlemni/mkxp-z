@@ -109,6 +109,13 @@ enum
     EVENT_COUNT
 };
 
+/* Last device to register an input */
+enum
+{
+    LAST_INPUT_DEVICE_KBM,
+    LAST_INPUT_DEVICE_GAMEPAD
+};
+
 static uint32_t usrIdStart;
 
 bool EventThread::allocUserEvents()
@@ -417,6 +424,7 @@ void EventThread::process(RGSSThreadData &rtData)
                 
             case SDL_MOUSEBUTTONDOWN :
                 mouseState.buttons[event.button.button] = true;
+                lastInputDevice = LAST_INPUT_DEVICE_KBM;
                 break;
                 
             case SDL_MOUSEBUTTONUP :
@@ -428,6 +436,7 @@ void EventThread::process(RGSSThreadData &rtData)
                 mouseState.y = event.motion.y;
                 cursorTimer();
                 updateCursorState(cursorInWindow, gameScreen);
+                lastInputDevice = LAST_INPUT_DEVICE_KBM;
                 break;
                 
             case SDL_MOUSEWHEEL :

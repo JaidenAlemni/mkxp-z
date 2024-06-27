@@ -25,6 +25,8 @@
 #include "input.h"
 
 #include <SDL_scancode.h>
+#include <SDL_keyboard.h>
+#include <SDL_joystick.h>
 #include <SDL_gamecontroller.h>
 #include <stdint.h>
 #include <assert.h>
@@ -88,6 +90,7 @@ struct SourceDesc
 	{
 		return !(*this == o);
 	}
+
 };
 
 #define JAXIS_THRESHOLD 0x4000

@@ -76,6 +76,7 @@ public:
 	static MouseState mouseState;
 	static TouchState touchState;
     static SDL_atomic_t verticalScrollDistance;
+	static uint8_t lastInputDevice;
     
     std::string textInputBuffer;
     void lockText(bool lock);

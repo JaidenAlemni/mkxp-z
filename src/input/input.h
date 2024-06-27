@@ -24,7 +24,6 @@
 
 #include <unordered_map>
 #include <SDL_gamecontroller.h>
-#include <SDL_keyboard.h>
 #include <string>
 #include <vector>
 
