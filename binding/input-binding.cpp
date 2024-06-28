@@ -407,7 +407,8 @@ RB_METHOD(inputKeyMapping) {
                     rb_ary_push(gamepadKeys, rb_str_new_cstr(shState->input().getButtonName(binds[i].src.d.cb)));
                     break;
                 case CAxis:
-                    rb_ary_push(gamepadKeys, rb_str_new_cstr(shState->input().getAxisName(binds[i].src.d.ca.axis)));
+                    // Axis direction would be helpful here, but ummm idk how to C++ :)
+                    rb_ary_push(gamepadKeys, rb_str_concat(rb_str_new_cstr(shState->input().getAxisName(binds[i].src.d.ca.axis)), rb_str_new_cstr(binds[i].src.d.ca.dir == Negative ? "-" : "+")));
                     break;
                 default:
                     break;
