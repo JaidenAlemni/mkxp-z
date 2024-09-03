@@ -192,11 +192,10 @@ struct ALStreamOpenHandler : FileSystem::OpenHandler
 {
 	bool looped;
 	ALDataSource *source;
-	int fallbackMode;
 	std::string errorMsg;
 
 	ALStreamOpenHandler(bool looped)
-	    : looped(looped), source(0), fallbackMode(0)
+	    : looped(looped), source(0)
 	{}
 
 	bool tryRead(SDL_RWops &ops, const char *ext)
@@ -225,7 +224,7 @@ struct ALStreamOpenHandler : FileSystem::OpenHandler
 				}
 			}
 
-			source = createSDLSource(ops, ext, STREAM_BUF_SIZE, looped, fallbackMode);
+			source = createSDLSource(ops, ext, STREAM_BUF_SIZE, looped);
 		}
 		catch (const Exception &e)
 		{
@@ -242,14 +241,21 @@ struct ALStreamOpenHandler : FileSystem::OpenHandler
 void ALStream::openSource(const std::string &filename)
 {
 	ALStreamOpenHandler handler(looped);
-	shState->fileSystem().openRead(handler, filename.c_str());
-
-	// Try fallback mode, e.g. for handling S32->F32 sample format conversion
-	if (!handler.source)
+	try
 	{
-		handler.fallbackMode = 1;
 		shState->fileSystem().openRead(handler, filename.c_str());
+	} catch (const Exception &e)
+	{
+		/* If no file was found then we leave the stream open.
+		 * A PHYSFSError means we found a match but couldn't
+		 * open the file, so we'll close it in that case. */
+		if (e.type != Exception::NoFileError)
+			close();
+		
+		throw e;
 	}
+
+	close();
 
 	if (!handler.source)
 	{
@@ -260,7 +266,6 @@ void ALStream::openSource(const std::string &filename)
 		Debug() << buf;
 	}
 	
-	close();
 	source = handler.source;
 	needsRewind.clear();
 }

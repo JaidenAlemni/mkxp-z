@@ -113,7 +113,7 @@ void AudioStream::play(const std::string &filename,
 	/* Requested audio file is different from current one */
 	bool diffFile = (filename != current.filename);
 
-	if (diffFile)
+	if (diffFile || sState == ALStream::Closed)
 	{
 		try
 		{
@@ -125,6 +125,13 @@ void AudioStream::play(const std::string &filename,
 		{
 			unlockStream();
 			throw e;
+		}
+	} else {
+		switch (sState)
+		{
+			case ALStream::Paused :
+			case ALStream::Playing :
+				stream.stop();
 		}
 	}
 

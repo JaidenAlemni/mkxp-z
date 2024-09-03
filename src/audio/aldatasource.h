@@ -56,8 +56,7 @@ struct ALDataSource
 ALDataSource *createSDLSource(SDL_RWops &ops,
                               const char *extension,
 			                  uint32_t maxBufSize,
-			                  bool looped,
-			                  int fallbackMode);
+			                  bool looped);
 
 ALDataSource *createVorbisSource(SDL_RWops &ops,
                                  bool looped);
