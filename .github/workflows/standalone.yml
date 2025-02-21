@@ -3,7 +3,7 @@ name: Distributed AutoBuilds
 
 on:
   push:
-    branches: ['dev', 'astravia-dev']
+    branches: ['release']
     paths-ignore: ['*.md', '*.json', '*.png']
 
 jobs:

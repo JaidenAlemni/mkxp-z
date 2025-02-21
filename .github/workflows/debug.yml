@@ -61,12 +61,11 @@ jobs:
           cd build/artifact
           cp /mingw64/bin/zlib1.dll .
           cp ../../windows/build-mingw64/bin/x64-msvcrt-ruby310.dll .
-          cp -r ../../windows/build-mingw64/lib/ruby/3.1.0 .
+          cp -r ../../windows/build-mingw64/lib/ruby .
           cp ../../vendor/ANGLE/libEGL.dll .
           cp ../../vendor/ANGLE/libGLESv2.dll .
           cp ../../vendor/ANGLE/vulkan-1.dll .
           cp ../../vendor/ANGLE/COPYING ./COPYING_ANGLE
-          mv ./3.1.0 ./stdlib
           cp ../mkxp-z.exe ./Game.exe
           cp ../../mkxp.json .
 
