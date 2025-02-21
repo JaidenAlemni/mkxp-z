@@ -76,7 +76,7 @@ jobs:
             build/artifact/*.dll
             build/artifact/*.exe
             build/artifact/mkxp.json
-            build/artifact/stdlib/
+            build/artifact/ruby/
 
   build-linux:
     name: Ubuntu 22.04
